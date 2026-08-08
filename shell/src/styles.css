@@ -1,101 +1,16 @@
-:root {
-  --bb-primary: #374c34;
-  --bb-primary-2: #47603f;
-  --bb-bg: #e9f0e6;
-  --bb-ink: #1f2a1c;
-}
-
+/* Chassi fino: reset mínimo. O visual vem inteiramente dos remotes
+   (o remote React traz o globals.css do app da Fase 1). */
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  background: var(--bb-bg);
-  color: var(--bb-ink);
+  min-height: 100%;
 }
 
-.app-shell {
-  min-height: 100vh;
-}
-
-.app-header {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 14px 28px;
-  background: var(--bb-primary);
-  color: #fff;
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 20px;
-  font-weight: 800;
-  color: #fff;
-  text-decoration: none;
-}
-
-.brand-mark {
-  display: inline-grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: #f6c445;
-  color: var(--bb-primary);
-  font-weight: 900;
-}
-
-.app-nav {
-  display: flex;
-  gap: 8px;
-  margin-left: 12px;
-}
-
-.nav-link {
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.85);
-  text-decoration: none;
-  transition: background 0.15s, color 0.15s;
-}
-
-.nav-link:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
-
-.nav-link--active {
-  background: #f6c445;
-  color: var(--bb-primary);
-  font-weight: 700;
-}
-
-.shell-badge {
-  margin-left: auto;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.15);
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.app-main {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 28px;
-}
-
-.remote-slot {
-  display: block;
-}
-
-.remote-slot[hidden] {
+#transacoes-root[hidden],
+#dashboard-root[hidden] {
   display: none;
 }

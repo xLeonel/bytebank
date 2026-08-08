@@ -64,8 +64,9 @@ export function registerRemotes(): void {
   registerApplication({
     name: 'dashboard',
     app: loadDashboard,
-    activeWhen: (location) =>
-      location.pathname === '/' || location.pathname.startsWith('/dashboard'),
+    // O remote React é o app completo (público + logado): ativo em todas as
+    // rotas, exceto o domínio de Transações (remote Angular).
+    activeWhen: (location) => !location.pathname.startsWith('/transacoes'),
   });
 
   registerApplication({

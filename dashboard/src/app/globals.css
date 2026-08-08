@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+/*
+ * ── Bytebank Design System tokens ────────────────────────────
+ *
+ * Both :root (document) and :host (shadow-DOM hosts) are targeted,
+ * mirroring Tailwind v4's own @layer theme { :root, :host { … } }
+ * pattern. Without :host, CSS custom properties that rely on
+ * inheritance can silently fall back inside shadow roots when
+ * running under Turbopack.
+ */
+:root,
+:host {
+  /* Fonte Inter carregada via @fontsource-variable/inter no entry do remote
+     (substitui o next/font da Fase 1, mantendo o mesmo nome de var). */
+  --font-inter: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  /* Colors */
+  --bb-primary:   #374C34;
+  --bb-secondary: #3F38A1;
+  --bb-accent:    #A15F38;
+  --bb-success:   #47A138;
+  --bb-warning:   #f59e0b;
+  --bb-error:     #D8353A;
+  --bb-dark:      #332E2B;
+
+  /* Typography
+   * --font-inter is set by next/font (inter.variable class on <html>).
+   * Referencing it here means --bb-font-family points to the font that
+   * Next.js actually downloaded and self-hosts, not the bare 'Inter'
+   * string which would miss the hashed @font-face name next/font uses. */
+  --bb-font-family:           var(--font-inter, ui-sans-serif, system-ui, sans-serif);
+  --bb-font-size-xs:          0.75rem;
+  --bb-font-size-sm:          0.875rem;
+  --bb-font-size-md:          1rem;
+  --bb-font-size-lg:          1.125rem;
+  --bb-font-size-xl:          1.25rem;
+  --bb-font-size-2xl:         1.5rem;
+  --bb-font-size-3xl:         2rem;
+  --bb-font-weight-light:     300;
+  --bb-font-weight-regular:   400;
+  --bb-font-weight-medium:    500;
+  --bb-font-weight-semibold:  600;
+  --bb-font-weight-bold:      700;
+  --bb-font-weight-extrabold: 800;
+  --bb-line-height:           1.5;
+
+  /* Spacing */
+  --bb-space-xs:  0.25rem;
+  --bb-space-sm:  0.5rem;
+  --bb-space-md:  1rem;
+  --bb-space-lg:  1.5rem;
+  --bb-space-xl:  2rem;
+  --bb-space-2xl: 3rem;
+
+  /* Borders & Elevation */
+  --bb-radius-sm: 0.25rem;
+  --bb-radius-md: 0.5rem;
+  --bb-radius-lg: 0.75rem;
+  --bb-radius-xl: 1rem;
+  --bb-radius:    var(--bb-radius-md);
+
+  --bb-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --bb-shadow-md: 0 4px 16px rgba(55, 76, 52, 0.12);
+  --bb-shadow-lg: 0 25px 50px rgba(0, 0, 0, 0.2);
+  --bb-shadow:    var(--bb-shadow-sm);
+}
+
+body {
+  background: #EEEEEE;
+  color: var(--bb-dark, #332E2B);
+  font-family: var(--bb-font-family);
+  line-height: var(--bb-line-height);
+}
