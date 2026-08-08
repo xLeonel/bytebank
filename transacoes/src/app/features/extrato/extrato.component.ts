@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import type { Transaction } from '@bytebank/core';
+import { CATEGORIES, type Transaction } from '@bytebank/core';
 import { loadTransactions } from '../../store/transactions.actions';
 import { selectTransactions } from '../../store/transactions.selectors';
 import { TransactionsService, type SaveTransactionDetail } from '../../core/transactions.service';
@@ -29,6 +29,34 @@ import { getPageItems, setMaxDateInputInShadow } from '../../core/dom-utils';
           placeholder="Pesquisar por descrição ou tipo"
           aria-label="Pesquisar transações"
         />
+        <div class="filters">
+          <label>
+            Tipo
+            <select [(ngModel)]="filterType" (ngModelChange)="onFilterChange()">
+              <option value="">Todos</option>
+              <option *ngFor="let t of typeOptions" [value]="t">{{ t }}</option>
+            </select>
+          </label>
+          <label>
+            Categoria
+            <select [(ngModel)]="filterCategory" (ngModelChange)="onFilterChange()">
+              <option value="">Todas</option>
+              <option *ngFor="let c of categoryOptions" [value]="c">{{ c }}</option>
+            </select>
+          </label>
+          <label>
+            De
+            <input type="date" [(ngModel)]="filterFrom" (ngModelChange)="onFilterChange()" />
+          </label>
+          <label>
+            Até
+            <input type="date" [(ngModel)]="filterTo" (ngModelChange)="onFilterChange()" />
+          </label>
+          <button type="button" class="clear" (click)="clearFilters()" [disabled]="!hasActiveFilters && !searchTerm">
+            Limpar
+          </button>
+        </div>
+
         <div class="showing">{{ showingText }}</div>
       </div>
 
@@ -81,7 +109,13 @@ import { getPageItems, setMaxDateInputInShadow } from '../../core/dom-utils';
         padding: 0.5rem 0.75rem; font-size: 0.875rem; font: inherit;
       }
       .search input:focus { outline: 2px solid var(--bb-primary, #374C34); outline-offset: 1px; }
-      .showing { margin-top: 0.5rem; font-size: 0.75rem; color: #64748b; }
+      .filters { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; align-items: flex-end; }
+      .filters label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.75rem; color: #475569; }
+      .filters select, .filters input { border: 1px solid #cbd5e1; border-radius: 0.375rem; padding: 0.4rem 0.5rem; font: inherit; font-size: 0.85rem; background: #fff; }
+      .filters select:focus, .filters input:focus { outline: 2px solid var(--bb-primary, #374C34); outline-offset: 1px; }
+      .filters .clear { border: 1px solid #cbd5e1; background: #fff; border-radius: 0.375rem; padding: 0.45rem 0.9rem; font: inherit; font-size: 0.85rem; color: #334155; cursor: pointer; }
+      .filters .clear:disabled { opacity: 0.5; cursor: not-allowed; }
+      .showing { margin-top: 0.75rem; font-size: 0.75rem; color: #64748b; }
       .pager { margin-top: 2.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; border-top: 1px solid #f3f4f6; padding-top: 1.5rem; }
       .pages { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5rem; }
       .ellipsis { padding: 0 0.25rem; color: #94a3b8; }
@@ -102,8 +136,15 @@ export class ExtratoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   all: Transaction[] = [];
   searchTerm = '';
+  filterType = '';
+  filterCategory = '';
+  filterFrom = '';
+  filterTo = '';
   currentPage = 1;
   itemsPerPage = 10;
+
+  readonly typeOptions = ['Depósito', 'Saque', 'Transferência', 'Pix'];
+  readonly categoryOptions = CATEGORIES;
   activeTx: Transaction | null = null;
   toast: { message: string; variant: 'success' | 'error' } | null = null;
 
@@ -145,10 +186,26 @@ export class ExtratoComponent implements OnInit, AfterViewInit, OnDestroy {
   get isEmpty(): boolean { return this.all.length === 0; }
   get filtered(): Transaction[] {
     const q = this.searchTerm.trim().toLowerCase();
-    if (!q) return this.all;
-    return this.all.filter(
-      (t) => (t.description ?? '').toLowerCase().includes(q) || t.type.toLowerCase().includes(q),
-    );
+    return this.all.filter((t) => {
+      if (q && !(t.description ?? '').toLowerCase().includes(q) && !t.type.toLowerCase().includes(q))
+        return false;
+      if (this.filterType && t.type !== this.filterType) return false;
+      if (this.filterCategory && (t.category ?? '') !== this.filterCategory) return false;
+      const iso = this.toIso(t.date);
+      if (this.filterFrom && iso < this.filterFrom) return false;
+      if (this.filterTo && iso > this.filterTo) return false;
+      return true;
+    });
+  }
+
+  get hasActiveFilters(): boolean {
+    return !!(this.filterType || this.filterCategory || this.filterFrom || this.filterTo);
+  }
+
+  /** 'DD/MM/YYYY' -> 'YYYY-MM-DD' (comparável lexicograficamente). */
+  private toIso(display: string): string {
+    const [d, m, y] = display.split('/');
+    return y && m && d ? `${y}-${m}-${d}` : display;
   }
   get totalPages(): number { return Math.max(1, Math.ceil(this.filtered.length / this.itemsPerPage)); }
   get startIndex(): number { return (this.currentPage - 1) * this.itemsPerPage; }
@@ -164,6 +221,16 @@ export class ExtratoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /* ---------- actions ---------- */
   onSearchChange(): void { this.currentPage = 1; this.renderList(); }
+  onFilterChange(): void { this.currentPage = 1; this.renderList(); }
+  clearFilters(): void {
+    this.filterType = '';
+    this.filterCategory = '';
+    this.filterFrom = '';
+    this.filterTo = '';
+    this.searchTerm = '';
+    this.currentPage = 1;
+    this.renderList();
+  }
   goToPage(p: number): void {
     this.currentPage = Math.min(Math.max(p, 1), this.totalPages);
     this.renderList();

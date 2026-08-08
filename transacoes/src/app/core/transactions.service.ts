@@ -21,6 +21,7 @@ export interface NewTransactionDetail {
   amount: number;
   date: string; // YYYY-MM-DD
   description?: string;
+  category?: string;
   agency?: string;
   account?: string;
   pixKey?: string;
@@ -33,6 +34,7 @@ export interface SaveTransactionDetail {
   description: string;
   amount: number; // já com sinal
   date: string; // DD/MM/YYYY
+  category?: string;
   newAttachments?: File[];
 }
 
@@ -65,6 +67,7 @@ export class TransactionsService {
       amount: Math.abs(Number(detail.amount)),
       date: detail.date,
       description: detail.description,
+      category: detail.category,
       agency,
       account,
       pixKey: detail.pixKey,
@@ -83,6 +86,7 @@ export class TransactionsService {
       description: detail.description,
       amount: detail.amount,
       date: toIsoDate(detail.date),
+      category: detail.category,
       attachments,
     });
     bus.emit(TRANSACTION_EVENTS.CHANGED, { reason: 'updated', id: detail.id });
