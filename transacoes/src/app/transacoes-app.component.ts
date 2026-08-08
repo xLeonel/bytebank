@@ -1,109 +1,107 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { bus, TRANSACTION_EVENTS, type TransactionChangeReason } from '@bytebank/mfe-events';
+import { navigateToUrl } from 'single-spa';
+import { clearSession, getSessionUser, getToken } from './core/session';
 
 @Component({
   selector: 'transacoes-root',
   template: `
-    <section class="tx-card">
-      <div class="tx-badges">
-        <span class="pill pill--angular">Angular MFE</span>
-        <span class="pill">Transações</span>
-      </div>
+    <div class="logged" *ngIf="authed">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <a class="brand" href="/home" (click)="nav($event, '/home')" aria-label="Ir para a página inicial">
+            <img src="/bytebank-logo.svg" alt="Bytebank" class="logo" />
+          </a>
+          <div class="user">
+            <span class="user-name">{{ userName }}</span>
+            <span class="avatar" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="8" r="4" /><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" />
+              </svg>
+            </span>
+            <button type="button" class="logout" (click)="logout()">Sair</button>
+          </div>
+        </div>
+      </header>
 
-      <h1>Olá do remote de Transações 👋</h1>
-      <p>
-        Este é o <strong>remote Angular</strong> montado pelo chassi via single-spa.
-        Aqui vão morar listagem, filtros, paginação e o CRUD de transações (NgRx).
-      </p>
+      <div class="shell">
+        <nav class="sidebar">
+          <a href="/home" (click)="nav($event, '/home')" [class.active]="isActive('/home')">Início</a>
+          <a href="/nova-transacao" (click)="nav($event, '/nova-transacao')" [class.active]="isActive('/nova-transacao')">Nova transação</a>
+          <a href="/extrato" (click)="nav($event, '/extrato')" [class.active]="isActive('/extrato')">Extrato</a>
+        </nav>
 
-      <div class="tx-bus">
-        <bb-badge
-          [attr.label]="'Eventos recebidos do bus: ' + busEvents"
-          variant="info"
-        ></bb-badge>
-        <p class="tx-hint" *ngIf="lastReason">
-          Último evento: <code>transactions:changed</code> ({{ lastReason }})
-        </p>
-        <p class="tx-hint" *ngIf="!lastReason">
-          Clique em “Emitir evento no bus” no dashboard para ver este contador subir.
-        </p>
+        <div class="content">
+          <app-nova-transacao *ngIf="view === 'nova'"></app-nova-transacao>
+          <app-extrato *ngIf="view === 'extrato'"></app-extrato>
+        </div>
       </div>
-    </section>
+    </div>
   `,
   styles: [
     `
-      :host {
-        display: block;
-      }
-      .tx-card {
-        border-radius: 18px;
-        padding: 28px;
-        background: #fff;
-        border: 1px solid rgba(55, 76, 52, 0.12);
-        box-shadow: 0 10px 30px rgba(31, 42, 28, 0.06);
-        color: #1f2a1c;
-      }
-      .tx-badges {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 12px;
-      }
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        border-radius: 999px;
-        padding: 4px 12px;
-        font-size: 12px;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        background: #eef3ec;
-        color: #47603f;
-      }
-      .pill--angular {
-        background: #fee2e2;
-        color: #b91c1c;
-      }
-      h1 {
-        margin: 6px 0 8px;
-        font-size: 1.6rem;
-      }
-      p {
-        line-height: 1.6;
-        color: #3f4a3b;
-      }
-      .tx-bus {
-        margin-top: 18px;
-        padding: 16px;
-        border-radius: 14px;
-        background: #f6f8f5;
-        border: 1px solid rgba(55, 76, 52, 0.1);
-      }
-      .tx-hint {
-        font-size: 0.9rem;
-        color: #6b7568;
-        margin: 10px 0 0;
-      }
+      :host { display: block; }
+      .logged { min-height: 100vh; width: 100%; background: #e7efe5; display: flex; flex-direction: column;
+        font-family: var(--bb-font-family, 'Inter Variable', ui-sans-serif, system-ui, sans-serif); color: #332e2b; }
+      .topbar { background: var(--bb-primary, #374C34); color: #fff; }
+      .topbar-inner { max-width: 80rem; margin: 0 auto; padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+      .brand { flex-shrink: 0; display: inline-flex; }
+      .logo { height: 2rem; width: auto; object-fit: contain; }
+      .user { display: flex; align-items: center; gap: 1rem; }
+      .user-name { font-size: 0.875rem; font-weight: 500; }
+      .avatar { width: 2.5rem; height: 2.5rem; border-radius: 9999px; border: 2px solid #f59e0b; color: #f59e0b; display: flex; align-items: center; justify-content: center; }
+      .logout { background: transparent; border: 1px solid #f59e0b; color: #f59e0b; border-radius: 0.375rem; padding: 0.35rem 0.9rem; font: inherit; font-size: 0.875rem; cursor: pointer; }
+      .logout:hover { background: rgba(245, 158, 11, 0.12); }
+      .shell { flex: 1; width: 100%; max-width: 80rem; margin: 0 auto; padding: 2rem; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 1.5rem; }
+      .sidebar { background: #fff; border-radius: 0.5rem; padding: 1rem; height: fit-content; display: flex; flex-direction: column; gap: 0.25rem; }
+      .sidebar a { display: block; padding: 0.625rem 0.875rem; border-radius: 0.375rem; color: #332e2b; text-decoration: none; font-size: 0.95rem; }
+      .sidebar a:hover { background: #f1f5ef; }
+      .sidebar a.active { background: var(--bb-primary, #374C34); color: #fff; font-weight: 600; }
+      .content { min-width: 0; }
+      @media (max-width: 768px) { .shell { grid-template-columns: 1fr; } }
     `,
   ],
 })
 export class AppComponent implements OnInit, OnDestroy {
-  busEvents = 0;
-  lastReason: TransactionChangeReason | '' = '';
-  private unsubscribe?: () => void;
+  authed = false;
+  view: 'extrato' | 'nova' = 'extrato';
+  userName = 'Cliente';
 
-  constructor(private readonly ngZone: NgZone) {}
+  private readonly onRoute = () => this.zone.run(() => this.syncFromLocation());
+
+  constructor(private readonly zone: NgZone) {}
 
   ngOnInit(): void {
-    this.unsubscribe = bus.on(TRANSACTION_EVENTS.CHANGED, (payload) => {
-      // Eventos externos (fora do Angular) precisam rodar dentro do NgZone.
-      this.ngZone.run(() => {
-        this.busEvents += 1;
-        this.lastReason = payload.reason;
-      });
-    });
+    if (!getToken()) {
+      navigateToUrl('/login');
+      return;
+    }
+    this.authed = true;
+    this.userName = getSessionUser()?.fullName ?? 'Cliente';
+    this.syncFromLocation();
+    window.addEventListener('popstate', this.onRoute);
+    window.addEventListener('single-spa:routing-event', this.onRoute);
   }
 
   ngOnDestroy(): void {
-    this.unsubscribe?.();
+    window.removeEventListener('popstate', this.onRoute);
+    window.removeEventListener('single-spa:routing-event', this.onRoute);
+  }
+
+  private syncFromLocation(): void {
+    this.view = window.location.pathname.startsWith('/nova-transacao') ? 'nova' : 'extrato';
+  }
+
+  isActive(path: string): boolean {
+    return window.location.pathname.startsWith(path);
+  }
+
+  nav(event: Event, path: string): void {
+    event.preventDefault();
+    navigateToUrl(path);
+  }
+
+  logout(): void {
+    clearSession();
+    navigateToUrl('/');
   }
 }

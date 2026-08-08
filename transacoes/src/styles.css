@@ -1,16 +1,26 @@
-:root {
-  color: #334155;
-  background: #fffaf3;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+/* Tokens do Design System replicados aqui para o remote Angular ser
+   autossuficiente (o React não é garantido estar carregado nessas rotas). */
+:root,
+:host {
+  --bb-primary: #374c34;
+  --bb-secondary: #3f38a1;
+  --bb-accent: #a15f38;
+  --bb-success: #47a138;
+  --bb-warning: #f59e0b;
+  --bb-error: #d8353a;
+  --bb-dark: #332e2b;
+  --bb-font-family: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 html,
 body {
   margin: 0;
   min-height: 100%;
-  background: linear-gradient(180deg, #fffaf3 0%, #fffdf9 100%);
-}
-
-* {
-  box-sizing: border-box;
+  background: #e7efe5;
+  color: var(--bb-dark);
+  font-family: var(--bb-font-family);
 }

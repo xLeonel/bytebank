@@ -11,8 +11,8 @@ import NotFound from '@/app/not-found';
 // Área logada (layout com AuthGuard + Account/Transactions providers + Outlet)
 import LoggedLayout from '@/app/(logged)/layout';
 import HomePage from '@/app/(logged)/home/page';
-import ExtratoPage from '@/app/(logged)/extrato/page';
-import NovaTransacaoPage from '@/app/(logged)/nova-transacao/page';
+// Obs.: /extrato e /nova-transacao agora são servidos pelo remote Angular
+// (single-spa roteia essas paths para o MFE de Transações).
 
 /**
  * Roteamento do app (antes: file-based do Next App Router). As rotas e URLs
@@ -29,8 +29,6 @@ export default function AppRoutes() {
 
       <Route element={<LoggedLayout />}>
         <Route path="/home" element={<HomePage />} />
-        <Route path="/extrato" element={<ExtratoPage />} />
-        <Route path="/nova-transacao" element={<NovaTransacaoPage />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

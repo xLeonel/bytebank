@@ -13,6 +13,10 @@ import { registerApplication, type LifeCycles } from 'single-spa';
 const DASHBOARD_BASE = import.meta.env.VITE_DASHBOARD_URL ?? 'http://localhost:4201';
 const TRANSACOES_BASE = import.meta.env.VITE_TRANSACOES_URL ?? 'http://localhost:4202';
 
+/** Rotas que pertencem ao remote Angular de Transações. */
+export const isTransacoesPath = (pathname: string): boolean =>
+  pathname.startsWith('/extrato') || pathname.startsWith('/nova-transacao');
+
 declare global {
   interface Window {
     transacoesAngularRemote?: LifeCycles;
@@ -64,14 +68,14 @@ export function registerRemotes(): void {
   registerApplication({
     name: 'dashboard',
     app: loadDashboard,
-    // O remote React é o app completo (público + logado): ativo em todas as
-    // rotas, exceto o domínio de Transações (remote Angular).
-    activeWhen: (location) => !location.pathname.startsWith('/transacoes'),
+    // O remote React é o app (público + home/auth): ativo em tudo, exceto o
+    // domínio de Transações (extrato / nova transação), que é do remote Angular.
+    activeWhen: (location) => !isTransacoesPath(location.pathname),
   });
 
   registerApplication({
     name: 'transacoes',
     app: loadTransacoes,
-    activeWhen: (location) => location.pathname.startsWith('/transacoes'),
+    activeWhen: (location) => isTransacoesPath(location.pathname),
   });
 }

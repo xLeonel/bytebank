@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { start } from 'single-spa';
-import { registerRemotes } from './spa';
+import { registerRemotes, isTransacoesPath } from './spa';
 
 // Registra os remotes uma única vez (fora do ciclo de render do React).
 registerRemotes();
@@ -32,7 +32,7 @@ function App() {
     };
   }, []);
 
-  const isTransacoes = path.startsWith('/transacoes');
+  const isTransacoes = isTransacoesPath(path);
 
   return (
     <>

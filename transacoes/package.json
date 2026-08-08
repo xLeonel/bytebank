@@ -18,6 +18,8 @@
     "@angular/router": "^18.2.0",
     "@bytebank/core": "*",
     "@bytebank/mfe-events": "*",
+    "@ngrx/effects": "^18.1.1",
+    "@ngrx/store": "^18.1.1",
     "@xleonel/bytebank-design-system": "^1.22.0",
     "rxjs": "^7.8.1",
     "single-spa": "^6.0.3",
