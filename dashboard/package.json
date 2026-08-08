@@ -1,0 +1,30 @@
+{
+  "name": "dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "start": "vite --port 4201 --strictPort",
+    "dev": "vite --port 4201 --strictPort",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 4201 --strictPort"
+  },
+  "dependencies": {
+    "@bytebank/core": "*",
+    "@bytebank/mfe-events": "*",
+    "@reduxjs/toolkit": "^2.3.0",
+    "@xleonel/bytebank-design-system": "^1.22.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-redux": "^9.1.2",
+    "single-spa-react": "^6.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~5.5.4",
+    "vite": "^5.4.10"
+  }
+}

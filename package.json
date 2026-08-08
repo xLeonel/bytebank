@@ -1,0 +1,26 @@
+{
+  "name": "bytebank",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bytebank — monorepo de microfrontends (chassi + MFEs) da Fase 2",
+  "workspaces": [
+    "shared/*",
+    "shell",
+    "dashboard",
+    "transacoes"
+  ],
+  "scripts": {
+    "build:shared": "npm run build -w @bytebank/mfe-events && npm run build -w @bytebank/core",
+    "dev": "npm run build:shared && concurrently -n shell,dashboard,transacoes -c cyan,magenta,yellow \"npm:dev:shell\" \"npm:dev:dashboard\" \"npm:dev:transacoes\"",
+    "dev:shell": "npm run dev -w shell",
+    "dev:dashboard": "npm run start -w dashboard",
+    "dev:transacoes": "npm run start -w transacoes",
+    "build": "npm run build:shared && npm run build -w dashboard && npm run build -w transacoes && npm run build -w shell"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

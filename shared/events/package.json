@@ -1,0 +1,19 @@
+{
+  "name": "@bytebank/mfe-events",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./index.js",
+  "module": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    }
+  },
+  "scripts": {
+    "build": "node -e \"process.stdout.write('mfe-events: no build step (authored JS)\\n')\""
+  }
+}
