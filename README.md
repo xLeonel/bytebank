@@ -80,11 +80,6 @@ O que sobe:
 - **backend** (NestJS) e **mongo** — só na rede interna (não expõem portas ao host).
 - **seed** — popula o banco (idempotente).
 
-## SSR/SSG
-
-O chassi é gerado como **SSG** (build estático do Vite): o `shell/dist/index.html`
-é servido diretamente pelo Caddy (com fallback de SPA para as rotas do single-spa).
-
 ## Scripts úteis
 
 ```bash
