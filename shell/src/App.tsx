@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { start } from 'single-spa';
+import { navigateToUrl, start } from 'single-spa';
+import { bus, AUTH_EVENTS } from '@bytebank/mfe-events';
 import { registerRemotes, isTransacoesPath } from './spa';
 
 // Registra os remotes uma única vez (fora do ciclo de render do React).
@@ -29,6 +30,21 @@ function App() {
     return () => {
       window.removeEventListener('popstate', onNav);
       window.removeEventListener('single-spa:routing-event', onNav);
+    };
+  }, []);
+
+  // Contrato de auth entre MFEs: logout em qualquer remote leva à landing;
+  // login leva à home. O chassi centraliza esse roteamento.
+  useEffect(() => {
+    const offLogout = bus.on(AUTH_EVENTS.LOGOUT, () => {
+      if (window.location.pathname !== '/') navigateToUrl('/');
+    });
+    const offLogin = bus.on(AUTH_EVENTS.LOGIN, () => {
+      if (!window.location.pathname.startsWith('/home')) navigateToUrl('/home');
+    });
+    return () => {
+      offLogout();
+      offLogin();
     };
   }, []);
 

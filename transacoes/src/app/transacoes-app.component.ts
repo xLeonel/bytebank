@@ -1,5 +1,6 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { navigateToUrl } from 'single-spa';
+import { bus, AUTH_EVENTS } from '@bytebank/mfe-events';
 import { clearSession, getSessionUser, getToken } from './core/session';
 
 @Component({
@@ -102,6 +103,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   logout(): void {
     clearSession();
+    bus.emit(AUTH_EVENTS.LOGOUT);
     navigateToUrl('/');
   }
 }

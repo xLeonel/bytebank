@@ -5,12 +5,14 @@
 // the amber colour; other secondary buttons on the page are unaffected.
 import { useRouter } from "next/navigation";
 import { clearSession } from "@/lib/session";
+import { bus, AUTH_EVENTS } from "@bytebank/mfe-events";
 
 export function LogoutButton() {
   const router = useRouter();
 
   const handleLogout = () => {
     clearSession();
+    bus.emit(AUTH_EVENTS.LOGOUT);
     router.push("/");
   };
 

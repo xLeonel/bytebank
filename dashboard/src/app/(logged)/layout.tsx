@@ -14,7 +14,7 @@ import { getSessionUser } from "@/lib/session";
 
 function LoggedContent({ children }: { children: ReactNode }) {
   const user = getSessionUser();
-  const { data, loading } = useAccount();
+  const { data, loading, version } = useAccount();
 
   return (
     <div className="min-h-screen w-full bg-[#e7efe5] flex flex-col">
@@ -48,6 +48,7 @@ function LoggedContent({ children }: { children: ReactNode }) {
         <Sidebar />
         {data ? (
           <TransactionsProvider
+            key={version}
             initialBalance={data.account.balance}
             initialTransactions={data.transactions}
           >

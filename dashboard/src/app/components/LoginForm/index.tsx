@@ -7,6 +7,7 @@ import { validateLoginForm } from "../LoginModal/helpers";
 import type { LoginFormData } from "../LoginModal/types";
 import { Field } from "@/app/(logged)/_components/Field";
 import { setSession } from "@/lib/session";
+import { bus, AUTH_EVENTS } from "@bytebank/mfe-events";
 import http from "@/http";
 
 const inputCls =
@@ -59,6 +60,11 @@ export function LoginForm() {
         login: profile.email,
         fullName: profile.name,
         firstName: (profile.name ?? "").split(" ")[0],
+      });
+      // Comunicação entre MFEs: avisa os demais que houve login.
+      bus.emit(AUTH_EVENTS.LOGIN, {
+        token: accessToken,
+        user: { name: profile.name, email: profile.email, agency: profile.agency, bankAccount: profile.bankAccount },
       });
       router.push("/home");
     } catch {
