@@ -5,8 +5,9 @@
   --bb-primary: #374c34;
   --bb-secondary: #3f38a1;
   --bb-accent: #a15f38;
-  --bb-success: #47a138;
-  --bb-warning: #f59e0b;
+  /* Ajustados para contraste AA (>=4.5:1). */
+  --bb-success: #2e7d32;
+  --bb-warning: #ffab00;
   --bb-error: #d8353a;
   --bb-dark: #332e2b;
   --bb-font-family: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;

@@ -19,8 +19,10 @@
   --bb-primary:   #374C34;
   --bb-secondary: #3F38A1;
   --bb-accent:    #A15F38;
-  --bb-success:   #47A138;
-  --bb-warning:   #f59e0b;
+  /* Tons ajustados para contraste AA (>=4.5:1): verde de sucesso mais escuro
+     sobre branco; âmbar um pouco mais claro sobre o verde primário. */
+  --bb-success:   #2E7D32;
+  --bb-warning:   #FFAB00;
   --bb-error:     #D8353A;
   --bb-dark:      #332E2B;
 

@@ -50,8 +50,8 @@ import { clearSession, getSessionUser, getToken } from './core/session';
       .user { display: flex; align-items: center; gap: 1rem; }
       .user-name { font-size: 0.875rem; font-weight: 500; }
       .avatar { width: 2.5rem; height: 2.5rem; border-radius: 9999px; border: 2px solid #f59e0b; color: #f59e0b; display: flex; align-items: center; justify-content: center; }
-      .logout { background: transparent; border: 1px solid #f59e0b; color: #f59e0b; border-radius: 0.375rem; padding: 0.35rem 0.9rem; font: inherit; font-size: 0.875rem; cursor: pointer; }
-      .logout:hover { background: rgba(245, 158, 11, 0.12); }
+      .logout { background: transparent; border: 1px solid var(--bb-warning, #ffab00); color: var(--bb-warning, #ffab00); border-radius: 0.375rem; padding: 0.35rem 0.9rem; font: inherit; font-size: 0.875rem; cursor: pointer; }
+      .logout:hover { background: rgba(255, 171, 0, 0.14); }
       .shell { flex: 1; width: 100%; max-width: 80rem; margin: 0 auto; padding: 2rem; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 1.5rem; }
       .sidebar { background: #fff; border-radius: 0.5rem; padding: 1rem; height: fit-content; display: flex; flex-direction: column; gap: 0.25rem; }
       .sidebar a { display: block; padding: 0.625rem 0.875rem; border-radius: 0.375rem; color: #332e2b; text-decoration: none; font-size: 0.95rem; }

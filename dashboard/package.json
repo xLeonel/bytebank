@@ -15,7 +15,7 @@
     "@fontsource-variable/inter": "^5.1.0",
     "@heroicons/react": "^2.2.0",
     "@reduxjs/toolkit": "^2.3.0",
-    "@xleonel/bytebank-design-system": "^1.23.0",
+    "@xleonel/bytebank-design-system": "^1.23.1",
     "axios": "^1.19.0",
     "lucide-react": "^1.16.0",
     "react": "^19.2.0",

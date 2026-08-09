@@ -11,7 +11,7 @@
   "dependencies": {
     "@bytebank/core": "*",
     "@bytebank/mfe-events": "*",
-    "@xleonel/bytebank-design-system": "^1.23.0",
+    "@xleonel/bytebank-design-system": "^1.23.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "single-spa": "^6.0.3"
