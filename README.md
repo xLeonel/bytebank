@@ -4,9 +4,9 @@ Monorepo da aplicação de gerenciamento financeiro **Bytebank**, reestruturada 
 **chassi + microfrontends** com [single-spa](https://single-spa.js.org/),
 integrando **React** e **Angular** na mesma página.
 
-- **Repositório:** https://github.com/xLeonel/bytebank
-- **Design System:** [`@xleonel/bytebank-design-system`](https://www.npmjs.com/package/@xleonel/bytebank-design-system) (web components Lit)
-- **Backend:** `back-end-grupo1-app-finance` (NestJS + MongoDB + JWT) — repositório irmão
+- **Repositório (monorepo):** https://github.com/xLeonel/bytebank
+- **Design System:** [github.com/xLeonel/bytebank-design-system](https://github.com/xLeonel/bytebank-design-system) — publicado como [`@xleonel/bytebank-design-system`](https://www.npmjs.com/package/@xleonel/bytebank-design-system) (web components Lit)
+- **Backend:** [github.com/elandro18/back-end-grupo1-app-finance](https://github.com/elandro18/back-end-grupo1-app-finance) (NestJS + MongoDB + JWT)
 
 ## Arquitetura
 
