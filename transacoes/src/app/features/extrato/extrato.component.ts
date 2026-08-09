@@ -11,7 +11,7 @@ import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
 import { CATEGORIES, type Transaction } from '@bytebank/core';
 import { loadTransactions } from '../../store/transactions.actions';
-import { selectTransactions } from '../../store/transactions.selectors';
+import { selectTransactions, selectTransactionsLoading } from '../../store/transactions.selectors';
 import { TransactionsService, type SaveTransactionDetail } from '../../core/transactions.service';
 import { getPageItems, setMaxDateInputInShadow } from '../../core/dom-utils';
 
@@ -135,6 +135,7 @@ export class ExtratoComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('modalHost', { static: true }) modalHost!: ElementRef;
 
   all: Transaction[] = [];
+  loading = false;
   searchTerm = '';
   filterType = '';
   filterCategory = '';
@@ -149,6 +150,7 @@ export class ExtratoComponent implements OnInit, AfterViewInit, OnDestroy {
   toast: { message: string; variant: 'success' | 'error' } | null = null;
 
   private sub?: Subscription;
+  private loadingSub?: Subscription;
   private modalEl: any = null;
   private toastTimer?: ReturnType<typeof setTimeout>;
 
@@ -167,6 +169,12 @@ export class ExtratoComponent implements OnInit, AfterViewInit, OnDestroy {
         this.renderList();
       });
     });
+    this.loadingSub = this.store.select(selectTransactionsLoading).subscribe((loading) => {
+      this.zone.run(() => {
+        this.loading = loading;
+        this.renderList();
+      });
+    });
   }
 
   ngAfterViewInit(): void {
@@ -178,6 +186,7 @@ export class ExtratoComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.loadingSub?.unsubscribe();
     this.closeDetail();
     if (this.toastTimer) clearTimeout(this.toastTimer);
   }
@@ -239,6 +248,7 @@ export class ExtratoComponent implements OnInit, AfterViewInit, OnDestroy {
   private renderList(): void {
     const el = this.listRef?.nativeElement;
     if (!el) return;
+    el.loading = this.loading;
     el.items = this.paginated;
     const noResults = !this.isEmpty && this.filtered.length === 0;
     el.emptyTitle = noResults ? 'Nenhum resultado encontrado' : 'Nenhuma transação por aqui ainda';

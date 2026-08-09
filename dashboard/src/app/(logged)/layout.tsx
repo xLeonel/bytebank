@@ -9,6 +9,7 @@ import { DsLoader } from "@/components/DsLoader";
 import { Sidebar } from "./_components/Sidebar";
 import { LogoutButton } from "./_components/LogoutButton";
 import { AuthGuard } from "./_components/AuthGuard";
+import { HomeSkeleton } from "./_components/HomeSkeleton";
 import { getSessionUser } from "@/lib/session";
 
 function LoggedContent({ children }: { children: ReactNode }) {
@@ -52,9 +53,11 @@ function LoggedContent({ children }: { children: ReactNode }) {
           >
             {children}
           </TransactionsProvider>
+        ) : loading ? (
+          <HomeSkeleton />
         ) : (
           <div className="flex items-center justify-center text-sm text-slate-500">
-            {loading ? "Carregando sua conta..." : "Não foi possível carregar sua conta."}
+            Não foi possível carregar sua conta.
           </div>
         )}
       </div>
