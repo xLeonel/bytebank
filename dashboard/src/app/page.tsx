@@ -35,10 +35,10 @@ export default function Home() {
         <div className="flex flex-col lg:flex-row items-center justify-center">
           <div className="max-w-2xl w-full px-2 sm:px-0">
             <h3 className="text-center text-4xl font-semibold leading-normal my-4">
-              Experimente mais <span className="text-[var(--bb-warning)]">liberdade</span> no controle da sua vida financeira.
+              Experimente mais liberdade no controle da sua vida financeira.
             </h3>
             <h4 className="text-center text-4xl font-semibold leading-normal my-4 hidden lg:block">
-              Crie sua <span className="text-[var(--bb-warning)]">conta</span> com a gente!
+              Crie sua conta com a gente!
             </h4>
           </div>
           <div className="flex justify-center lg:pr-20">
