@@ -82,20 +82,24 @@ faz proxy do backend na mesma origem, com **HTTPS automático** quando há domí
    # swap de 2GB (recomendado no t3.micro)
    sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
    ```
-3. **Clonar os dois repositórios** lado a lado e criar o `.env` do backend:
+3. **Clonar os dois repositórios** lado a lado:
    ```bash
    git clone https://github.com/xLeonel/bytebank.git
    git clone https://github.com/elandro18/back-end-grupo1-app-finance.git
-   # criar back-end-grupo1-app-finance/.env com JWT_SECRET etc.
    ```
-4. **Subir** (com domínio → HTTPS automático):
+   > O backend usa apenas `MONGODB_URI`, já definido pelo `docker-compose` — não
+   > é necessário criar `.env`.
+4. **Subir**:
    ```bash
    cd bytebank
-   SITE_ADDRESS=app.seu-dominio.com docker compose up -d --build
+   # Sem domínio (HTTP no IP público):
+   SITE_ADDRESS=:80 docker compose up -d --build
    ```
-   Sem domínio, use o IP público: `SITE_ADDRESS=:80 docker compose up -d --build`
-   (apenas HTTP). Aponte o DNS do domínio para o IP da instância antes de subir com
-   HTTPS.
+   - **HTTPS sem domínio próprio:** use um DNS curinga gratuito apontando pro IP,
+     ex. `SITE_ADDRESS=<IP-PUBLICO>.sslip.io docker compose up -d --build` — o
+     Caddy emite o certificado Let's Encrypt automaticamente.
+   - **Com domínio próprio:** aponte o DNS pro IP e use
+     `SITE_ADDRESS=app.seu-dominio.com docker compose up -d --build`.
 
 > **Frontends na Vercel (alternativa):** os 3 apps podem ir para a Vercel (um
 > projeto por app, com `VITE_API_URL`/`VITE_*_URL` por env var); nesse caso o
