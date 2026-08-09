@@ -52,7 +52,7 @@ Pré-requisito: clonar o backend **ao lado** deste repositório:
 ```
 fiap/
 ├── bytebank/                       (este repo)
-└── back-end-grupo1-app-finance/    (backend; precisa do .env dele)
+└── back-end-grupo1-app-finance/    (backend — repositório irmão)
 ```
 
 ```bash
@@ -70,56 +70,46 @@ O que sobe:
 
 ## Deploy em produção (AWS EC2 + Caddy)
 
-Topologia: uma VM roda o `docker compose` acima. O **Caddy** serve os frontends e
-faz proxy do backend na mesma origem, com **HTTPS automático** quando há domínio.
+Topologia: uma VM roda o mesmo `docker compose` da seção anterior. O **Caddy**
+serve os frontends e faz proxy do backend na mesma origem, com **HTTPS
+automático** (via domínio próprio ou `sslip.io`).
 
-1. **Criar a instância** (Ubuntu, t3.small recomendado; t3.micro funciona com swap).
-   No *security group*, liberar as portas **22, 80 e 443**.
-2. **Instalar Docker + Compose plugin** e (em t3.micro) criar swap:
-   ```bash
-   curl -fsSL https://get.docker.com | sh
-   sudo usermod -aG docker $USER   # reabrir a sessão SSH depois
-   # swap de 2GB (recomendado no t3.micro)
-   sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
-   ```
-3. **Clonar os dois repositórios** lado a lado:
-   ```bash
-   git clone https://github.com/xLeonel/bytebank.git
-   git clone https://github.com/elandro18/back-end-grupo1-app-finance.git
-   ```
-   > O backend usa apenas `MONGODB_URI`, já definido pelo `docker-compose` — não
-   > é necessário criar `.env`.
-4. **Subir**:
-   ```bash
-   cd bytebank
-   # Sem domínio (HTTP no IP público):
-   SITE_ADDRESS=:80 docker compose up -d --build
-   ```
-   - **HTTPS sem domínio próprio:** use um DNS curinga gratuito apontando pro IP,
-     ex. `SITE_ADDRESS=<IP-PUBLICO>.sslip.io docker compose up -d --build` — o
-     Caddy emite o certificado Let's Encrypt automaticamente.
-   - **Com domínio próprio:** aponte o DNS pro IP e use
-     `SITE_ADDRESS=app.seu-dominio.com docker compose up -d --build`.
+**1. Criar a instância** — Ubuntu (t3.small recomendado; t3.micro funciona com
+swap). No *security group*, liberar as portas **22, 80 e 443**. (Opcional, mas
+recomendado: associar um **Elastic IP** para o endereço não mudar.)
 
-### HTTPS sem domínio próprio (sslip.io)
+**2. Instalar Docker + swap** (via SSH):
+```bash
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER      # reabra o SSH depois para valer
+# swap de 2GB (recomendado no t3.micro / 1GB RAM)
+sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile
+```
 
-O [sslip.io](https://sslip.io) é um DNS curinga: `<IP>.sslip.io` já resolve para
-esse IP **automaticamente, sem cadastro nem configuração**. Assim o Caddy
-consegue emitir um certificado Let's Encrypt e você tem HTTPS real.
+**3. Clonar os dois repositórios lado a lado:**
+```bash
+git clone https://github.com/xLeonel/bytebank.git
+git clone https://github.com/elandro18/back-end-grupo1-app-finance.git
+```
 
-1. (Recomendado) Associe um **Elastic IP** à instância para o IP não mudar.
-2. Confirme que as portas **80 e 443** estão abertas no security group.
-3. Suba usando o IP como host (pontos ou hífens funcionam):
-   ```bash
-   # ex.: IP público 54.207.10.20
-   SITE_ADDRESS=54.207.10.20.sslip.io docker compose up -d --build
-   ```
-4. Acesse **https://54.207.10.20.sslip.io** (o cert é emitido no 1º acesso, ~30–60s).
+**4. Subir** (a partir de `bytebank/`):
+```bash
+# HTTP, usando o IP público:
+SITE_ADDRESS=:80 docker compose up -d --build
 
-> Se o IP mudar (parar/iniciar a instância sem Elastic IP), o host `.sslip.io`
-> muda junto e um novo certificado é emitido. Para uma URL estável, use Elastic IP.
-> Alternativa com nome bonito: registrar um subdomínio grátis no DuckDNS apontando
-> para o IP e usar `SITE_ADDRESS=seu-nome.duckdns.org`.
+# OU HTTPS sem domínio próprio (sslip.io resolve <IP>.sslip.io para o IP):
+SITE_ADDRESS=SEU_IP.sslip.io docker compose up -d --build
+
+# OU HTTPS com domínio próprio (aponte o DNS para o IP antes):
+SITE_ADDRESS=app.seu-dominio.com docker compose up -d --build
+```
+
+> Acabou de instalar o Docker e ainda não reabriu o SSH? Rode os comandos acima
+> com `sudo -E` (o grupo `docker` só passa a valer no próximo login).
+
+Acesse a URL escolhida e faça login com o usuário demo (`demo@bytebank.com` /
+`123456`). Com HTTPS via `sslip.io`, o certificado Let's Encrypt é emitido no 1º
+acesso (~30–60s) — exige as portas 80 e 443 abertas e um IP estável (Elastic IP).
 
 > **Frontends na Vercel (alternativa):** os 3 apps podem ir para a Vercel (um
 > projeto por app, com `VITE_API_URL`/`VITE_*_URL` por env var); nesse caso o
