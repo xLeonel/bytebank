@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { TriangleAlert } from "lucide-react";
 import { validateForm } from "../RegisterModal/helpers";
 import type { RegisterFormData } from "../RegisterModal/types";
-import { REGISTER_VALIDATIONS } from "../RegisterModal/constants";
 import { Field } from "@/app/(logged)/_components/Field";
 import { setSession } from "@/lib/session";
 import http from "@/http";
@@ -36,15 +35,6 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [submitError, setSubmitError] = useState("");
   const router = useRouter();
 
-  // Botão só habilita quando o formulário está pronto para envio.
-  const isFormValid =
-    formData.name.trim().length > 0 &&
-    REGISTER_VALIDATIONS.emailRegex.test(formData.email) &&
-    formData.password.length >= REGISTER_VALIDATIONS.minPasswordLength &&
-    formData.agency.trim().length > 0 &&
-    formData.bankAccount.trim().length > 0 &&
-    formData.terms;
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -54,6 +44,21 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+  };
+
+  // Agência: apenas dígitos (até 5).
+  const handleAgencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 5);
+    setFormData((prev) => ({ ...prev, agency: digits }));
+    if (errors.agency) setErrors((prev) => ({ ...prev, agency: "" }));
+  };
+
+  // Conta: apenas dígitos, formatada como 00000-0 (dígito verificador após o hífen).
+  const handleAccountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 9);
+    const formatted = digits.length > 1 ? `${digits.slice(0, -1)}-${digits.slice(-1)}` : digits;
+    setFormData((prev) => ({ ...prev, bankAccount: formatted }));
+    if (errors.bankAccount) setErrors((prev) => ({ ...prev, bankAccount: "" }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -170,9 +175,10 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
         <Field label="Agência">
           <input
             type="text"
+            inputMode="numeric"
             name="agency"
             value={formData.agency}
-            onChange={handleChange}
+            onChange={handleAgencyChange}
             placeholder="0001"
             className={inputCls}
           />
@@ -182,9 +188,10 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
         <Field label="Conta bancária">
           <input
             type="text"
+            inputMode="numeric"
             name="bankAccount"
             value={formData.bankAccount}
-            onChange={handleChange}
+            onChange={handleAccountChange}
             placeholder="12345-6"
             className={inputCls}
           />
@@ -205,6 +212,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
           Política de Privacidade do banco.
         </span>
       </label>
+      {errors.terms && <span className={errorCls}>{errors.terms}</span>}
 
       {submitError && (
         <div role="alert" className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 p-3">
@@ -215,7 +223,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
 
       <button
         type="submit"
-        disabled={submitting || !isFormValid}
+        disabled={submitting}
         className="mt-2 w-full rounded-md py-2.5 font-bold transition bg-[var(--bb-warning,#f59e0b)] text-[var(--bb-dark,#332E2B)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {submitting ? "Criando conta..." : "Criar conta"}

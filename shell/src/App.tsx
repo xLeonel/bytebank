@@ -1,18 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { navigateToUrl, start } from 'single-spa';
 import { bus, AUTH_EVENTS } from '@bytebank/mfe-events';
-import { registerRemotes, isTransacoesPath } from './spa';
+import { registerRemotes, isTransacoesPath, prefetchRemotes } from './spa';
 
 // Registra os remotes uma única vez (fora do ciclo de render do React).
 registerRemotes();
 
+const remoteFor = (pathname: string) => (isTransacoesPath(pathname) ? 'transacoes' : 'dashboard');
+
 /**
- * Chassi fino: sem chrome próprio. Cada remote renderiza a UI completa
- * (o app React da Fase 1 traz sua própria navbar/sidebar). O shell só
- * expõe os slots e deixa o single-spa montar/desmontar por rota.
+ * Chassi fino: sem chrome próprio. Cada remote renderiza a UI completa.
+ * Mostra um loader durante a troca de remote (React↔Angular) para não piscar
+ * uma tela branca enquanto o bundle do MFE baixa/monta.
  */
 function App() {
   const [path, setPath] = useState(window.location.pathname);
+  const [loading, setLoading] = useState(true);
+  const activeRemote = useRef(remoteFor(window.location.pathname));
 
   // Design System registrado uma única vez, aqui, para todos os MFEs.
   useEffect(() => {
@@ -21,15 +25,29 @@ function App() {
 
   useEffect(() => {
     start({ urlRerouteOnly: true });
+    // Aquece o cache dos bundles dos remotes (prod) após o carregamento inicial.
+    const t = setTimeout(() => prefetchRemotes(), 2000);
+    return () => clearTimeout(t);
   }, []);
 
   useEffect(() => {
-    const onNav = () => setPath(window.location.pathname);
-    window.addEventListener('popstate', onNav);
-    window.addEventListener('single-spa:routing-event', onNav);
+    const onBeforeRoute = () => {
+      // Só mostra o loader quando o remote realmente muda (não em navegação
+      // interna do mesmo MFE, ex.: /home -> /login dentro do React).
+      if (remoteFor(window.location.pathname) !== activeRemote.current) setLoading(true);
+    };
+    const onRoute = () => {
+      setPath(window.location.pathname);
+      activeRemote.current = remoteFor(window.location.pathname);
+      setLoading(false);
+    };
+    window.addEventListener('single-spa:before-routing-event', onBeforeRoute);
+    window.addEventListener('single-spa:routing-event', onRoute);
+    window.addEventListener('popstate', onRoute);
     return () => {
-      window.removeEventListener('popstate', onNav);
-      window.removeEventListener('single-spa:routing-event', onNav);
+      window.removeEventListener('single-spa:before-routing-event', onBeforeRoute);
+      window.removeEventListener('single-spa:routing-event', onRoute);
+      window.removeEventListener('popstate', onRoute);
     };
   }, []);
 
@@ -52,6 +70,12 @@ function App() {
 
   return (
     <>
+      {loading && (
+        <div className="mfe-loading" role="status" aria-live="polite">
+          <span className="mfe-spinner" aria-hidden="true" />
+          <span className="mfe-loading-text">Carregando…</span>
+        </div>
+      )}
       {/* ids são alvo do domElementGetter de cada MFE; ficam sempre no DOM */}
       <div id="dashboard-root" hidden={isTransacoes} />
       <div id="transacoes-root" hidden={!isTransacoes} />

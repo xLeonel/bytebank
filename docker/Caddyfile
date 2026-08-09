@@ -7,6 +7,14 @@
 {$SITE_ADDRESS} {
 	encode gzip
 
+	# Cache: imagens e fontes por 30 dias (ex.: bytebank.png para de "expirar").
+	@media path *.png *.jpg *.jpeg *.gif *.webp *.svg *.ico *.woff *.woff2
+	header @media Cache-Control "public, max-age=2592000"
+
+	# Chunks com hash no nome (Vite) → imutáveis por 1 ano.
+	@hashed path /assets/* /remotes/dashboard/assets/*
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+
 	# API na mesma origem: /api/* -> backend (o prefixo /api é removido).
 	handle_path /api/* {
 		reverse_proxy backend:3000

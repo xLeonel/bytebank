@@ -82,6 +82,30 @@ const loadTransacoes = (): Promise<LifeCycles> =>
       .catch(reject);
   });
 
+/**
+ * Pré-carrega (prefetch) os bundles dos remotes em produção, para que a
+ * navegação entre React↔Angular seja instantânea (sem tela branca baixando .js).
+ * Em dev não faz sentido (o Vite serve os módulos fonte on-demand).
+ */
+export function prefetchRemotes(): void {
+  if (!import.meta.env.PROD) return;
+  const hrefs = [
+    `${DASHBOARD_BASE}/dashboard.js`,
+    `${DASHBOARD_BASE}/dashboard.css`,
+    `${TRANSACOES_BASE}/runtime.js`,
+    `${TRANSACOES_BASE}/polyfills.js`,
+    `${TRANSACOES_BASE}/main.js`,
+    `${TRANSACOES_BASE}/styles.css`,
+  ];
+  for (const href of hrefs) {
+    if (document.querySelector(`link[rel="prefetch"][href="${href}"]`)) continue;
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+}
+
 export function registerRemotes(): void {
   if (window.__bytebankRegistered) return;
   window.__bytebankRegistered = true;
