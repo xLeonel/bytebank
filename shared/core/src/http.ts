@@ -7,8 +7,18 @@ export type ApiConfig = {
   getToken: () => string | null;
 };
 
+declare global {
+  interface Window {
+    __bytebankApiBaseUrl?: string;
+  }
+}
+
 const config: ApiConfig = {
-  baseURL: 'http://localhost:3000',
+  // Em produção o shell define window.__bytebankApiBaseUrl (ex.: '/api' na
+  // mesma origem, atrás do Caddy). Em dev, cai no backend local.
+  baseURL:
+    (typeof window !== 'undefined' && window.__bytebankApiBaseUrl) ||
+    'http://localhost:3000',
   // Por padrão lê o token do sessionStorage (compatível com a Fase 0).
   getToken: () =>
     typeof window !== 'undefined' ? window.sessionStorage.getItem('token') : null,

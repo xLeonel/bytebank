@@ -23,7 +23,7 @@
           "configurations": {
             "production": {
               "budgets": [],
-              "outputHashing": "all"
+              "outputHashing": "none"
             },
             "development": {
               "optimization": false,

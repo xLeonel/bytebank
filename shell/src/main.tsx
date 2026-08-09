@@ -2,6 +2,10 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './styles.css';
 
+// Base da API compartilhada por todos os MFEs (o @bytebank/core lê daqui).
+// Em prod: '/api' na mesma origem (Caddy). Em dev: backend local.
+window.__bytebankApiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 // Com vários MFEs na mesma página, mais de um bundle pode tentar registrar os
 // mesmos web components do DS na única CustomElementRegistry global. Tornamos o
 // customElements.define idempotente para evitar o erro "already defined".

@@ -2,11 +2,17 @@ import { enableProdMode, NgZone } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import type { LifeCycles } from 'single-spa';
 import { singleSpaAngular, getSingleSpaExtraProviders } from 'single-spa-angular';
+import { configureApi } from '@bytebank/core';
 
 // Obs.: o Design System é registrado UMA vez pelo shell (custom elements são
 // globais na página). Importá-lo aqui causaria "bb-* already defined".
 
 import { AppModule } from './app/app.module';
+
+// Alinha a base da API com o shell (prod: '/api' na mesma origem; dev: local).
+configureApi({
+  baseURL: (window as any).__bytebankApiBaseUrl || 'http://localhost:3000',
+});
 
 declare const ngDevMode: boolean | undefined;
 

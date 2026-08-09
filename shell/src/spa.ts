@@ -25,8 +25,21 @@ declare global {
 }
 
 /* ----- dashboard (React remote) ----- */
-const loadDashboard = () =>
-  import(/* @vite-ignore */ `${DASHBOARD_BASE}/src/spa.tsx`) as Promise<LifeCycles>;
+// Dev: o Vite serve o módulo fonte. Prod: bundle com nome estável + CSS próprio
+// (injetado aqui, pois um módulo importado dinamicamente não carrega seu <link>).
+const loadDashboard = (): Promise<LifeCycles> => {
+  if (import.meta.env.PROD) {
+    if (!document.querySelector('link[data-dashboard-css]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `${DASHBOARD_BASE}/dashboard.css`;
+      link.setAttribute('data-dashboard-css', '');
+      document.head.appendChild(link);
+    }
+    return import(/* @vite-ignore */ `${DASHBOARD_BASE}/dashboard.js`) as Promise<LifeCycles>;
+  }
+  return import(/* @vite-ignore */ `${DASHBOARD_BASE}/src/spa.tsx`) as Promise<LifeCycles>;
+};
 
 /* ----- transacoes (Angular remote) ----- */
 const ANGULAR_BUNDLES = ['runtime', 'polyfills', 'main'] as const;
@@ -47,6 +60,14 @@ function loadScript(src: string, marker: string): Promise<void> {
 const loadTransacoes = (): Promise<LifeCycles> =>
   new Promise((resolve, reject) => {
     if (window.transacoesAngularRemote) return resolve(window.transacoesAngularRemote);
+    // Em prod, injeta também o styles.css global do Angular (tokens/base).
+    if (import.meta.env.PROD && !document.querySelector('link[data-transacoes-css]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `${TRANSACOES_BASE}/styles.css`;
+      link.setAttribute('data-transacoes-css', '');
+      document.head.appendChild(link);
+    }
     ANGULAR_BUNDLES.reduce(
       (chain, bundle) =>
         chain.then(() =>

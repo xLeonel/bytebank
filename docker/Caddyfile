@@ -1,0 +1,27 @@
+{
+	admin off
+}
+
+# SITE_ADDRESS = ":80" (local/IP, HTTP) ou "seu-dominio.com" (EC2 → HTTPS
+# automático via Let's Encrypt). Definido no docker-compose.
+{$SITE_ADDRESS} {
+	encode gzip
+
+	# API na mesma origem: /api/* -> backend (o prefixo /api é removido).
+	handle_path /api/* {
+		reverse_proxy backend:3000
+	}
+
+	# Bundles dos remotes (arquivos estáticos reais).
+	handle /remotes/* {
+		root * /srv
+		file_server
+	}
+
+	# Shell (SPA): qualquer rota cai no index.html do chassi.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

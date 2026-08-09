@@ -1,0 +1,52 @@
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: bytebank_mono_mongo
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+
+  # Backend NestJS (repositório irmão). Não expõe portas ao host — só a rede
+  # interna do compose; o acesso externo é via Caddy em /api.
+  backend:
+    build: ../back-end-grupo1-app-finance
+    container_name: bytebank_mono_backend
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:27017/bytebank
+    env_file:
+      - path: ../back-end-grupo1-app-finance/.env
+        required: false
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  # Popula o banco (idempotente): demo@bytebank.com / 123456
+  seed:
+    image: mongo:7.0
+    depends_on:
+      - mongo
+    volumes:
+      - ../back-end-grupo1-app-finance/seed:/seed:ro
+    command: >
+      bash -lc "until mongosh --host mongo --quiet --eval 'db.runCommand({ping:1})' >/dev/null 2>&1; do echo 'aguardando mongo...'; sleep 2; done; mongosh 'mongodb://mongo:27017/bytebank' --quiet --file /seed/seed.js"
+    restart: "no"
+
+  # Frontends (shell + remotes) buildados + Caddy servindo tudo na mesma origem.
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: bytebank_mono_web
+    environment:
+      # ":80" local/IP (HTTP). Em produção com domínio, ex.: SITE_ADDRESS=app.exemplo.com (HTTPS auto).
+      - SITE_ADDRESS=${SITE_ADDRESS:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
