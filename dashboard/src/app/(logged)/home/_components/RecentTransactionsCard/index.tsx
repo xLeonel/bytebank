@@ -21,6 +21,7 @@ type SaveData = {
   description: string;
   amount: number;
   date: string;
+  category?: string;
   attachments: Transaction["attachments"];
 };
 
@@ -60,11 +61,12 @@ function DetailModal({
     setMaxDateInputInShadow(el);
 
     const handleSave = async (e: Event) => {
-      const { id, description, amount, date, newAttachments } = (e as CustomEvent).detail as {
+      const { id, description, amount, date, category, newAttachments } = (e as CustomEvent).detail as {
         id: string;
         description: string;
         amount: number;
         date: string;
+        category?: string;
         newAttachments?: File[];
       };
       const newFile = newAttachments?.[0];
@@ -76,6 +78,7 @@ function DetailModal({
           description,
           amount,
           date: toIsoDate(date),
+          category,
           attachments: apiAtts,
         });
       } catch (err) {
@@ -83,7 +86,7 @@ function DetailModal({
         onErrorRef.current("Não foi possível salvar a transação. Tente novamente.");
         return;
       }
-      onSaveRef.current(id, { description, amount, date, attachments: finalClient });
+      onSaveRef.current(id, { description, amount, date, category, attachments: finalClient });
     };
     const handleDelete = async (e: Event) => {
       const id = (e as CustomEvent).detail.id as string;

@@ -48,6 +48,7 @@ export function updateTransactionApi(
     description?: string;
     amount?: number;
     date?: string;
+    category?: string;
     attachments?: ApiAttachment[];
   }
 ) {

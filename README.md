@@ -80,15 +80,6 @@ O que sobe:
 - **backend** (NestJS) e **mongo** — só na rede interna (não expõem portas ao host).
 - **seed** — popula o banco (idempotente).
 
-## Demo em produção
-
-Aplicação publicada na **AWS EC2**, com o stack completo (frontends + backend +
-MongoDB) orquestrado por **Docker Compose** e servido pelo **Caddy** na mesma
-origem, com **HTTPS automático**.
-
-- **Demo:** http://18.231.222.195 — login: `demo@bytebank.com` / `123456`
-- Passo a passo de deploy (EC2 + Caddy): [`docs/DEPLOY.md`](docs/DEPLOY.md)
-
 ## SSR/SSG
 
 O chassi é gerado como **SSG** (build estático do Vite): o `shell/dist/index.html`

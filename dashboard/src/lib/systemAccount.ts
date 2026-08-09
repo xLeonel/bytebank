@@ -8,6 +8,7 @@ type BackendTransaction = {
   type: string;
   date: string;
   description?: string;
+  category?: string;
   agency?: string;
   account?: string;
   pixKey?: string;
@@ -49,6 +50,7 @@ function mapTransaction(tx: BackendTransaction): Transaction {
     amount: tx.amount,
     date: toDisplayDate(tx.date),
     description: tx.description,
+    category: tx.category,
     agency: tx.agency,
     account: tx.account,
     pixKey: tx.pixKey,
