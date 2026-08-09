@@ -101,6 +101,26 @@ faz proxy do backend na mesma origem, com **HTTPS automático** quando há domí
    - **Com domínio próprio:** aponte o DNS pro IP e use
      `SITE_ADDRESS=app.seu-dominio.com docker compose up -d --build`.
 
+### HTTPS sem domínio próprio (sslip.io)
+
+O [sslip.io](https://sslip.io) é um DNS curinga: `<IP>.sslip.io` já resolve para
+esse IP **automaticamente, sem cadastro nem configuração**. Assim o Caddy
+consegue emitir um certificado Let's Encrypt e você tem HTTPS real.
+
+1. (Recomendado) Associe um **Elastic IP** à instância para o IP não mudar.
+2. Confirme que as portas **80 e 443** estão abertas no security group.
+3. Suba usando o IP como host (pontos ou hífens funcionam):
+   ```bash
+   # ex.: IP público 54.207.10.20
+   SITE_ADDRESS=54.207.10.20.sslip.io docker compose up -d --build
+   ```
+4. Acesse **https://54.207.10.20.sslip.io** (o cert é emitido no 1º acesso, ~30–60s).
+
+> Se o IP mudar (parar/iniciar a instância sem Elastic IP), o host `.sslip.io`
+> muda junto e um novo certificado é emitido. Para uma URL estável, use Elastic IP.
+> Alternativa com nome bonito: registrar um subdomínio grátis no DuckDNS apontando
+> para o IP e usar `SITE_ADDRESS=seu-nome.duckdns.org`.
+
 > **Frontends na Vercel (alternativa):** os 3 apps podem ir para a Vercel (um
 > projeto por app, com `VITE_API_URL`/`VITE_*_URL` por env var); nesse caso o
 > backend continua no EC2/container. Este repositório está preparado para o
