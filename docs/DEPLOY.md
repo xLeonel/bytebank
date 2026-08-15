@@ -47,8 +47,55 @@ Com HTTPS via `sslip.io`, o certificado Let's Encrypt é emitido no 1º acesso
 ```bash
 docker compose ps                 # status
 docker compose logs -f web        # logs do Caddy/frontends (ou: backend)
-git pull && docker compose up -d --build   # atualizar após novo commit
-docker compose down -v && docker compose up -d --build  # recriar o banco (re-seed)
+```
+
+### Atualizar após novo commit
+
+> **Atualize os DOIS repositórios.** O `docker-compose.yml` deste repo builda o
+> backend a partir de `../back-end-grupo1-app-finance`. Um `git pull` só aqui
+> sobe frontend novo contra backend antigo — sem erro visível, só comportamento
+> velho.
+
+```bash
+git -C ~/bytebank pull && git -C ~/back-end-grupo1-app-finance pull
+```
+
+```bash
+cd ~/bytebank && SITE_ADDRESS=:80 docker compose up -d --build
+```
+
+Sem `down -v`, o stack antigo continua servindo durante todo o build; os
+containers só são recriados no final (downtime de segundos). Use `down -v`
+apenas quando quiser **recriar o banco** — ele apaga o volume e o serviço
+`seed` repopula do zero:
+
+```bash
+cd ~/bytebank && SITE_ADDRESS=:80 docker compose down -v && SITE_ADDRESS=:80 docker compose up -d --build
+```
+
+> Builds levam ~5–10 min. Se estiver numa sessão que pode expirar (SSM, SSH
+> instável), rode com `nohup` para uma queda de conexão não matar o build:
+> `nohup env SITE_ADDRESS=:80 sh -c 'docker compose up -d --build; echo FIM rc=$?' > /tmp/deploy.log 2>&1 &`
+
+### Scripts de manutenção no banco
+
+Rode pelo serviço `seed`, que já tem o diretório `seed/` do backend montado em
+`/seed` e está na rede do compose. Não use `mongosh` por stdin no container
+`mongo` — sem `--file` ele entra em modo REPL e quebra expressões multi-linha.
+
+```bash
+cd ~/bytebank && docker compose run --rm seed bash -lc "mongosh 'mongodb://mongo:27017/bytebank' --quiet --file /seed/NOME_DO_SCRIPT.js"
+```
+
+### Conferir se o deploy pegou
+
+O `Last-Modified` de `/` **não serve**: é o `index.html` do shell, numa layer
+Docker separada — se o shell não mudou, a layer vem do cache com data antiga
+mesmo em deploy bem-sucedido. Verifique o backend por um endpoint público e o
+frontend pelo bundle do remote:
+
+```bash
+curl -s http://SEU_IP/api/transactions/types && curl -sI http://SEU_IP/remotes/dashboard/dashboard.js | grep -i last-modified
 ```
 
 > **Alternativa (Vercel):** os 3 frontends podem ir para a Vercel (um projeto por
