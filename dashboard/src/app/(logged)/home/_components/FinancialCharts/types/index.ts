@@ -5,9 +5,10 @@ export type MonthlyTotals = {
   saidas: number;
 };
 
-export type CategorySlice = {
-  category: string;
-  total: number; // sum of absolute values of saída amounts for this category
+export type TypeSlice = {
+  type: string; // rótulo exibido do tipo: "Depósito", "Saque", "Transferência Pix"
+  total: number; // soma dos valores absolutos movimentados neste tipo
+  direcao: "entrada" | "saida"; // Depósito é crédito; os demais, débito
 };
 
 export type BalancePoint = {

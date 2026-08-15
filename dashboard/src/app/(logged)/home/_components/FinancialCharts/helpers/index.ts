@@ -1,5 +1,5 @@
 import type { Transaction } from "@/app/(logged)/_components/TransactionDetailModal/types";
-import type { MonthlyTotals, CategorySlice, BalancePoint } from "../types";
+import type { MonthlyTotals, TypeSlice, BalancePoint } from "../types";
 
 const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
   month: "short",
@@ -46,27 +46,29 @@ export function groupByMonth(transactions: Transaction[]): MonthlyTotals[] {
 }
 
 /**
- * Soma as saídas por categoria, da maior para a menor.
+ * Soma o valor movimentado por tipo de transação, do maior para o menor.
  *
- * Agrupa por categoria e não por tipo: com a taxonomia consolidada sobraram só
- * dois tipos de saída (Saque e Transferência Pix), o que dava um gráfico de
- * duas fatias. A categoria é o eixo que o usuário escolhe no cadastro e tem
- * ~11 valores, então diz muito mais sobre para onde o dinheiro foi.
- *
- * Transações antigas podem não ter categoria (o campo é opcional e foi
- * adicionado depois) — elas caem em "Sem categoria" em vez de sumirem do total.
+ * Cobre os 3 tipos do cadastro — Depósito, Saque e Transferência Pix — e não
+ * só as saídas. Como Depósito é crédito e os outros dois são débito, soma-se o
+ * valor absoluto (volume movimentado) e devolve-se a direção de cada um, para
+ * o gráfico deixar a diferença explícita pela cor em vez de misturar entrada e
+ * saída num único percentual sem significado.
  */
-export function groupExpensesByCategory(transactions: Transaction[]): CategorySlice[] {
-  const totalsByCategory = new Map<string, number>();
+export function groupTotalsByType(transactions: Transaction[]): TypeSlice[] {
+  const totaisPorTipo = new Map<string, { total: number; direcao: "entrada" | "saida" }>();
 
   for (const tx of transactions) {
-    if (tx.amount >= 0) continue;
-    const categoria = tx.category?.trim() || "Sem categoria";
-    totalsByCategory.set(categoria, (totalsByCategory.get(categoria) ?? 0) + Math.abs(tx.amount));
+    if (tx.amount === 0) continue;
+    const direcao = tx.amount > 0 ? "entrada" : "saida";
+    const atual = totaisPorTipo.get(tx.type);
+    totaisPorTipo.set(tx.type, {
+      total: (atual?.total ?? 0) + Math.abs(tx.amount),
+      direcao: atual?.direcao ?? direcao,
+    });
   }
 
-  return Array.from(totalsByCategory.entries())
-    .map(([category, total]) => ({ category, total }))
+  return Array.from(totaisPorTipo.entries())
+    .map(([type, { total, direcao }]) => ({ type, total, direcao }))
     .sort((a, b) => b.total - a.total);
 }
 
