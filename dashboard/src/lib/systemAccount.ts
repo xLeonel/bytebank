@@ -26,11 +26,12 @@ export type CurrentUserData = {
 };
 
 // Valores do enum TransactionType da API -> rótulos exibidos na aplicação.
+// Os rótulos batem com as opções do formulário de cadastro (Design System),
+// para o tipo exibido ser o mesmo que o usuário escolheu ao lançar.
 const TYPE_DISPLAY: Record<string, string> = {
   saque: "Saque",
   deposito: "Depósito",
-  transferencia: "Transferência",
-  pix: "Pix",
+  pix: "Transferência Pix",
 };
 
 // A API devolve a data em ISO (YYYY-MM-DDTHH:mm:ss.sssZ). A aplicação espera

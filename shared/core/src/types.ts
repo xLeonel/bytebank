@@ -21,8 +21,13 @@ export type Transaction = {
   attachments?: TransactionAttachment[];
 };
 
-/** Enum de tipo aceito pelo backend. */
-export type ApiTransactionType = 'saque' | 'deposito' | 'transferencia' | 'pix';
+/**
+ * Enum de tipo aceito pelo backend.
+ *
+ * 'transferencia' foi consolidado em 'pix' — eram o mesmo conceito, e o
+ * cadastro só oferece "Transferência Pix".
+ */
+export type ApiTransactionType = 'saque' | 'deposito' | 'pix';
 
 /** Transação no formato do backend (NestJS/Mongo). */
 export type BackendTransaction = {

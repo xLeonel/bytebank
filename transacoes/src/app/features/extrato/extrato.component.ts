@@ -144,7 +144,8 @@ export class ExtratoComponent implements OnInit, AfterViewInit, OnDestroy {
   currentPage = 1;
   itemsPerPage = 10;
 
-  readonly typeOptions = ['Depósito', 'Saque', 'Transferência', 'Pix'];
+  // Mesmas opções do formulário de cadastro (Design System).
+  readonly typeOptions = ['Depósito', 'Saque', 'Transferência Pix'];
   readonly categoryOptions = CATEGORIES;
   activeTx: Transaction | null = null;
   toast: { message: string; variant: 'success' | 'error' } | null = null;

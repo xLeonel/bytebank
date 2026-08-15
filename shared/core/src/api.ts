@@ -14,20 +14,25 @@ import type {
  * Mapeamento de tipos front <-> back
  * ------------------------------------------------------------------ */
 
-/** Enum da API -> rótulo exibido na UI. */
+/**
+ * Enum da API -> rótulo exibido na UI.
+ *
+ * Os rótulos são exatamente as opções do formulário de cadastro (Design
+ * System: bb-new-transaction-list), para o tipo exibido no extrato e nos
+ * gráficos ser o mesmo que o usuário escolheu ao lançar a transação.
+ */
 export const TYPE_DISPLAY: Record<string, string> = {
   saque: 'Saque',
   deposito: 'Depósito',
-  transferencia: 'Transferência',
-  pix: 'Pix',
+  pix: 'Transferência Pix',
 };
 
 /** Rótulo da UI -> enum da API. */
 export const TYPE_API: Record<string, ApiTransactionType> = {
   Saque: 'saque',
   Depósito: 'deposito',
-  Transferência: 'transferencia',
   'Transferência Pix': 'pix',
+  // Aceita o rótulo curto porque telas antigas ainda podem emiti-lo.
   Pix: 'pix',
 };
 
