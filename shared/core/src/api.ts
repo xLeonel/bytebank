@@ -6,6 +6,7 @@ import type {
   ApiTransactionType,
   AuthUser,
   BackendTransaction,
+  DepositType,
   Transaction,
   TransactionAttachment,
 } from './types.js';
@@ -127,9 +128,24 @@ export function registerUser(input: RegisterInput): Promise<unknown> {
  * Transações
  * ------------------------------------------------------------------ */
 
+/**
+ * Deriva o destino do depósito a partir do sinal que o Design System já
+ * calcula: o bb-new-transaction-list emite valor negativo exatamente quando o
+ * depósito é "Em outra conta". O backend precisa disso explícito porque a API
+ * recebe o valor sempre positivo (@IsPositive) e aplica o sinal no servidor.
+ */
+export function inferDepositType(
+  tipoExibido: string,
+  valorComSinal: number,
+): DepositType | undefined {
+  if (tipoExibido !== 'Depósito') return undefined;
+  return valorComSinal < 0 ? 'other' : 'own';
+}
+
 export type CreateTransactionInput = {
   userId?: string;
   type: ApiTransactionType;
+  depositType?: DepositType;
   amount: number;
   date: string; // YYYY-MM-DD
   description?: string;

@@ -4,6 +4,7 @@ import {
   updateTransaction as apiUpdate,
   deleteTransaction as apiDelete,
   fileToApiAttachment,
+  inferDepositType,
   toApiAttachments,
   toIsoDate,
   TYPE_API,
@@ -61,9 +62,15 @@ export class TransactionsService {
       }
     }
 
+    // O DS emite o valor já com sinal; a API exige positivo e aplica o sinal no
+    // servidor. Por isso o destino do depósito vai explícito — sem ele, um
+    // depósito em outra conta era somado ao saldo em vez de subtraído.
+    const depositType = inferDepositType(detail.type, Number(detail.amount));
+
     await createTransaction({
       userId: getCurrentUserId(),
       type: (TYPE_API[detail.type] ?? detail.type) as ApiTransactionType,
+      depositType,
       amount: Math.abs(Number(detail.amount)),
       date: detail.date,
       description: detail.description,

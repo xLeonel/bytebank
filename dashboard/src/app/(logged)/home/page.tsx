@@ -19,6 +19,8 @@ export default function HomePage() {
           greetingName={user?.firstName ?? "Teste"}
           today={today}
           accountType={data?.account.type ?? "Conta Corrente"}
+          agency={data?.account.agency}
+          account={data?.account.number}
         />
         <ServicesCard />
         <FinancialCharts />

@@ -72,9 +72,17 @@ export function NovaTransacaoForm() {
           throw new Error("Valor da transação inválido");
         }
 
+        // O DS emite o valor já com sinal — negativo exatamente quando o
+        // depósito é "Em outra conta". A API exige valor positivo e aplica o
+        // sinal no servidor, então o destino precisa ir explícito; sem ele, um
+        // depósito em outra conta era somado ao saldo em vez de subtraído.
+        const depositType =
+          type === "Depósito" ? (numericAmount < 0 ? "other" : "own") : undefined;
+
         const payload = {
           userId: getCurrentUserId(),
           type: TRANSACTION_TYPE_API[type] ?? type,
+          depositType,
           amount: Math.abs(numericAmount),
           date: date,
           description: description,

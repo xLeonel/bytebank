@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useTransactions } from "@/contexts/Transactions";
 import type { Props } from "./types";
 
-export function BalanceCard({ greetingName, today, accountType }: Props) {
+export function BalanceCard({ greetingName, today, accountType, agency, account }: Props) {
   const { balance } = useTransactions();
   const ref = useRef<HTMLElement>(null);
 
@@ -15,7 +15,10 @@ export function BalanceCard({ greetingName, today, accountType }: Props) {
     el.greetingName = greetingName;
     el.today = today;
     el.accountType = accountType;
-  }, [greetingName, today, accountType]);
+    // O WC oculta o bloco quando ambos são vazios, então "" é um valor válido.
+    el.agency = agency ?? "";
+    el.account = account ?? "";
+  }, [greetingName, today, accountType, agency, account]);
 
   useEffect(() => {
     const el = ref.current as any;

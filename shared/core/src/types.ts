@@ -29,12 +29,19 @@ export type Transaction = {
  */
 export type ApiTransactionType = 'saque' | 'deposito' | 'pix';
 
+/**
+ * Destino de um depósito. Define o sinal do valor: na própria conta credita,
+ * em outra conta debita (o dinheiro sai daqui). Só se aplica a 'deposito'.
+ */
+export type DepositType = 'own' | 'other';
+
 /** Transação no formato do backend (NestJS/Mongo). */
 export type BackendTransaction = {
   _id: string;
   user: string;
   amount: number;
   type: string;
+  depositType?: DepositType;
   date: string;
   description?: string;
   category?: string;
