@@ -1,5 +1,5 @@
 import type { Transaction } from "@/app/(logged)/_components/TransactionDetailModal/types";
-import type { MonthlyTotals, TypeSlice, BalancePoint } from "../types";
+import type { MonthlyTotals, CategorySlice, BalancePoint } from "../types";
 
 const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
   month: "short",
@@ -45,16 +45,28 @@ export function groupByMonth(transactions: Transaction[]): MonthlyTotals[] {
   return Array.from(totalsByMonth.values()).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
 }
 
-export function groupExpensesByType(transactions: Transaction[]): TypeSlice[] {
-  const totalsByType = new Map<string, number>();
+/**
+ * Soma as saídas por categoria, da maior para a menor.
+ *
+ * Agrupa por categoria e não por tipo: com a taxonomia consolidada sobraram só
+ * dois tipos de saída (Saque e Transferência Pix), o que dava um gráfico de
+ * duas fatias. A categoria é o eixo que o usuário escolhe no cadastro e tem
+ * ~11 valores, então diz muito mais sobre para onde o dinheiro foi.
+ *
+ * Transações antigas podem não ter categoria (o campo é opcional e foi
+ * adicionado depois) — elas caem em "Sem categoria" em vez de sumirem do total.
+ */
+export function groupExpensesByCategory(transactions: Transaction[]): CategorySlice[] {
+  const totalsByCategory = new Map<string, number>();
 
   for (const tx of transactions) {
     if (tx.amount >= 0) continue;
-    totalsByType.set(tx.type, (totalsByType.get(tx.type) ?? 0) + Math.abs(tx.amount));
+    const categoria = tx.category?.trim() || "Sem categoria";
+    totalsByCategory.set(categoria, (totalsByCategory.get(categoria) ?? 0) + Math.abs(tx.amount));
   }
 
-  return Array.from(totalsByType.entries())
-    .map(([type, total]) => ({ type, total }))
+  return Array.from(totalsByCategory.entries())
+    .map(([category, total]) => ({ category, total }))
     .sort((a, b) => b.total - a.total);
 }
 

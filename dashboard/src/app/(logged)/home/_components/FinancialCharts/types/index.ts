@@ -5,9 +5,9 @@ export type MonthlyTotals = {
   saidas: number;
 };
 
-export type TypeSlice = {
-  type: string;
-  total: number; // sum of absolute values of saída amounts for this type
+export type CategorySlice = {
+  category: string;
+  total: number; // sum of absolute values of saída amounts for this category
 };
 
 export type BalancePoint = {
