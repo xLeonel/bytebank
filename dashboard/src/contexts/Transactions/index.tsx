@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import type { Transaction } from "@/app/(logged)/_components/TransactionDetailModal/types";
 
 type ContextValue = {
@@ -23,12 +23,32 @@ function sumAmounts(transactions: Transaction[]) {
   return transactions.reduce((acc, tx) => acc + tx.amount, 0);
 }
 
+/** "DD/MM/YYYY" -> "YYYYMMDD", comparável lexicograficamente. */
+function sortKey(display: string) {
+  const [d, m, y] = display.split("/");
+  return y && m && d ? `${y}${m}${d}` : display;
+}
+
+/**
+ * Ordena da mais recente para a mais antiga, mantendo a ordem de inserção
+ * dentro do mesmo dia (Array.sort é estável). Como `addTransaction` insere no
+ * início, a transação recém-criada continua aparecendo primeiro entre as do
+ * seu dia — mas uma transação retroativa vai para a posição certa da lista.
+ */
+function sortByDateDesc(transactions: Transaction[]) {
+  return [...transactions].sort((a, b) => sortKey(b.date).localeCompare(sortKey(a.date)));
+}
+
 export function TransactionsProvider({
   initialBalance,
   initialTransactions,
   children,
 }: ProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
+
+  // Exposta sempre ordenada: a home corta as 7 primeiras como "últimas
+  // transações", então a ordem do array é o que define o card.
+  const sorted = useMemo(() => sortByDateDesc(transactions), [transactions]);
 
   const baseline = initialBalance - sumAmounts(initialTransactions);
   const balance = baseline + sumAmounts(transactions);
@@ -47,7 +67,7 @@ export function TransactionsProvider({
 
   return (
     <TransactionsContext.Provider
-      value={{ transactions, balance, addTransaction, updateTransaction, deleteTransaction }}
+      value={{ transactions: sorted, balance, addTransaction, updateTransaction, deleteTransaction }}
     >
       {children}
     </TransactionsContext.Provider>

@@ -143,10 +143,33 @@ export type UpdateTransactionInput = {
   attachments?: ApiAttachment[];
 };
 
+/**
+ * Ordena da mais recente para a mais antiga.
+ *
+ * O backend já devolve ordenado; isto é uma rede de segurança para não
+ * depender da ordem da API (e para versões da API ainda sem o sort). Roda
+ * sobre a transação crua, onde `date` ainda é ISO com hora — depois do
+ * `mapTransaction` a data vira DD/MM/YYYY e a hora se perde.
+ *
+ * Desempate por `_id`: o ObjectId do Mongo começa com o timestamp de criação
+ * e é crescente, então `_id` decrescente ≈ criada por último primeiro.
+ */
+export function sortTransactionsByDateDesc(
+  transactions: BackendTransaction[],
+): BackendTransaction[] {
+  return [...transactions].sort((a, b) => {
+    const diff = Date.parse(b.date) - Date.parse(a.date);
+    if (diff) return diff;
+    return b._id.localeCompare(a._id);
+  });
+}
+
 export function listTransactions(): Promise<BackendTransaction[]> {
   return apiRequest<BackendTransaction[] | { value: BackendTransaction[] }>(
     '/transactions',
-  ).then((data) => (Array.isArray(data) ? data : data?.value ?? []));
+  )
+    .then((data) => (Array.isArray(data) ? data : data?.value ?? []))
+    .then(sortTransactionsByDateDesc);
 }
 
 export function getBalance(): Promise<number> {
