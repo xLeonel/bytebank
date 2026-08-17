@@ -34,11 +34,13 @@ export function MovimentacaoPorTipoChart() {
     );
   }
 
-  const altura = Math.max(200, data.length * 46 + 40);
+  // Preenche a altura disponível do card, mas nunca menos que o necessário
+  // para as barras não se espremerem quando houver muitos tipos.
+  const alturaMinima = Math.max(200, data.length * 46 + 40);
 
   return (
-    <div>
-      <ResponsiveContainer width="100%" height={altura}>
+    <div className="h-full flex flex-col">
+      <ResponsiveContainer width="100%" height="100%" minHeight={alturaMinima}>
         <BarChart data={data} layout="vertical" margin={{ top: 4, right: 24, bottom: 4, left: 8 }}>
           <CartesianGrid horizontal={false} stroke="#e2e8f0" />
           <XAxis type="number" hide />

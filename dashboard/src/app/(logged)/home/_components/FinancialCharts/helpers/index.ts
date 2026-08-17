@@ -55,20 +55,24 @@ export function groupByMonth(transactions: Transaction[]): MonthlyTotals[] {
  * saída num único percentual sem significado.
  */
 export function groupTotalsByType(transactions: Transaction[]): TypeSlice[] {
-  const totaisPorTipo = new Map<string, { total: number; direcao: "entrada" | "saida" }>();
+  // Soma COM sinal. Um tipo não tem direção fixa: desde que existe destino de
+  // depósito, "Depósito" pode ter lançamentos positivos (na própria conta) e
+  // negativos (em outra). A direção sai do líquido do grupo, e a barra mostra
+  // o módulo desse líquido — assim a cor sempre corresponde ao número exibido.
+  const liquidoPorTipo = new Map<string, number>();
 
   for (const tx of transactions) {
     if (tx.amount === 0) continue;
-    const direcao = tx.amount > 0 ? "entrada" : "saida";
-    const atual = totaisPorTipo.get(tx.type);
-    totaisPorTipo.set(tx.type, {
-      total: (atual?.total ?? 0) + Math.abs(tx.amount),
-      direcao: atual?.direcao ?? direcao,
-    });
+    liquidoPorTipo.set(tx.type, (liquidoPorTipo.get(tx.type) ?? 0) + tx.amount);
   }
 
-  return Array.from(totaisPorTipo.entries())
-    .map(([type, { total, direcao }]) => ({ type, total, direcao }))
+  return Array.from(liquidoPorTipo.entries())
+    .filter(([, liquido]) => liquido !== 0)
+    .map(([type, liquido]) => ({
+      type,
+      total: Math.abs(liquido),
+      direcao: liquido > 0 ? ("entrada" as const) : ("saida" as const),
+    }))
     .sort((a, b) => b.total - a.total);
 }
 
